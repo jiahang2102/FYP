@@ -9,7 +9,7 @@ st.set_page_config(
 )
 
 # Load the dataset
-DATA_PATH = "data/SOI database_cleaned.xlsx"  # Update the path as per your repository structure
+DATA_PATH = "data/cleansed_data.xlsx"  # Updated to point to the correct file
 def load_data(file_path):
     try:
         df = pd.read_excel(file_path, sheet_name=0)
