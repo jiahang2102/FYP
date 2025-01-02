@@ -48,7 +48,9 @@ columns_to_display = [
 ]
 
 # Keep only existing columns in the dataset
-columns_to_display = [col for col in columns_to_display if col in data.columns]
+for col in columns_to_display:
+    if col not in data.columns:
+        data[col] = None  # Add missing columns with null values (NaN)
 
 if not columns_to_display:
     st.error("No valid columns found in the dataset. Please check the data file.")
@@ -59,7 +61,7 @@ data_display = data[columns_to_display].fillna("N/A")
 
 # Editable data table
 edited_data = st.data_editor(
-    data[columns_to_display],
+    data[columns_to_display],  # Select columns for display
     num_rows="dynamic",
     disabled=[],  # Allow editing of all columns
     column_config={
