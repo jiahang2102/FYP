@@ -33,9 +33,6 @@ This dashboard displays inventory data directly from the cleansed dataset.
 
 st.info("Below is the current inventory data. You can edit, add, or remove entries as needed.")
 
-# Display column names for debugging
-st.write("Columns in DataFrame:", data.columns.tolist())
-
 # Define relevant columns for display
 columns_to_display = [
     "Brand Name",
