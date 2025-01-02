@@ -33,6 +33,9 @@ This dashboard displays inventory data directly from the cleansed dataset.
 
 st.info("Below is the current inventory data. You can edit, add, or remove entries as needed.")
 
+# Display column names for debugging
+st.write("Columns in DataFrame:", data.columns.tolist())
+
 # Define relevant columns for display
 columns_to_display = [
     "Brand Name",
@@ -44,6 +47,12 @@ columns_to_display = [
     "Weight per Unit Box or Strip",
     "Weight-to-Strength Ratio",
 ]
+
+# Check if all required columns exist
+missing_columns = [col for col in columns_to_display if col not in data.columns]
+if missing_columns:
+    st.error(f"The following columns are missing from the data: {missing_columns}")
+    st.stop()
 
 # Editable data table
 edited_data = st.data_editor(
