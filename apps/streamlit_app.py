@@ -9,16 +9,18 @@ st.set_page_config(
 )
 
 # Load the dataset
-DATA_PATH = "SOI_database_cleaned.xlsx"  # Ensure the Excel file is in the same directory
+DATA_URL = "https://raw.githubusercontent.com/jiahang2102/FYP/main/data/SOI%20database_cleaned.xlsx"  # GitHub raw URL
+
 def load_data(file_path):
     try:
         df = pd.read_excel(file_path, sheet_name=0)
         return df
-    except FileNotFoundError:
-        st.error("Data file not found. Please ensure 'SOI_database_cleaned.xlsx' is in the directory.")
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
-data = load_data(DATA_PATH)
+# Load data from GitHub raw URL
+data = load_data(DATA_URL)
 
 # Check if data loaded successfully
 if data.empty:
