@@ -25,6 +25,9 @@ data = load_data(DATA_PATH)
 if data.empty:
     st.stop()
 
+# Clean data values by stripping any whitespace and ensuring consistent data types
+data = data.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+
 # Display the title and introductory information
 """
 # 🌐 Drug Inventory Tracker
@@ -34,34 +37,12 @@ This dashboard displays inventory data directly from the uploaded datasheet.
 
 st.info("Below is the current inventory data. You can edit, add, or remove entries as needed.")
 
-# Define relevant columns for display
-columns_to_display = [
-    "Brand Name",
-    "Drug Code",
-    "Active Pharmaceutical Ingredients",
-    "Active Pharmeutical Ingredient Strength (mg)",
-    "Dosage Form",
-    "Combination Drug (Y/N)",
-    "Special Formulation (Y/N)",
-    "number of tablets",
-    "Total weight of counted drug with mixed packing",
-]
-
-# Keep only existing columns in the dataset
-for col in columns_to_display:
-    if col not in data.columns:
-        data[col] = None  # Add missing columns with null values (NaN)
-
-if not columns_to_display:
-    st.error("No valid columns found in the dataset. Please check the data file.")
-    st.stop()
-
-# Replace null values with a placeholder for better visualization
-data_display = data[columns_to_display].fillna("N/A")
+# Dynamically set columns_to_display to include all columns from the cleansed dataset
+columns_to_display = list(data.columns)  # Use all columns from the dataset
 
 # Editable data table
 edited_data = st.data_editor(
-    data[columns_to_display],  # Select columns for display
+    data[columns_to_display],
     num_rows="dynamic",
     disabled=[],  # Allow editing of all columns
     column_config={
