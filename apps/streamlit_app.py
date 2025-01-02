@@ -29,7 +29,7 @@ if data.empty:
 # 🌐 Drug Inventory Tracker
 
 **Track your drug inventory with ease!**
-This dashboard displays inventory data directly from the uploaded datasheet.
+This dashboard displays inventory data directly from the cleansed dataset.
 """
 
 st.info("Below is the current inventory data. You can edit, add, or remove entries as needed.")
@@ -53,7 +53,8 @@ edited_data = st.data_editor(
     disabled=[],  # Allow editing of all columns
     column_config={
         "Active Pharmeutical Ingredient Strength (mg)": st.column_config.NumberColumn(format="%.2f mg"),
-        "Total weight of counted drug with mixed packing": st.column_config.NumberColumn(format="%.2f g"),
+        "Total weight of tablets without mixed packaging": st.column_config.NumberColumn(format="%.2f g"),
+        "Weight-to-Strength Ratio": st.column_config.NumberColumn(format="%.2f"),
     },
     key="inventory_table",
 )
@@ -73,7 +74,7 @@ st.subheader("Inventory Insights")
 # 1. Total weight by drug
 st.altair_chart(
     alt.Chart(data).mark_bar().encode(
-        x="Total weight of counted drug with mixed packing",
+        x="Total weight of tablets without mixed packaging",
         y=alt.Y("Brand Name", sort="-x"),
         color="Brand Name",
     ),
