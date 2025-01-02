@@ -11,6 +11,8 @@ from sklearn.metrics import mean_squared_error, r2_score, make_scorer
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
+import tkinter as tk
+from tkinter import filedialog
 
 
 def load_and_prepare_data(file_path):
@@ -146,7 +148,22 @@ def load_and_prepare_data(file_path):
 
 # File selection utility
 def select_file():
-    return "SOI_database_cleaned.xlsx"
+    print("Select the Excel file to load the data.")
+    root = tk.Tk()
+    root.withdraw()  # Hide the main tkinter window
+    file_path = filedialog.askopenfilename(
+        title="Select Excel File",
+        filetypes=[("Excel files", "*.xlsx *.xls"), ("All files", "*.*")]
+    )
+    if not file_path:
+        print("No file selected. Exiting...")
+        exit(1)
+    return file_path
+
+# Get file path dynamically
+file_path = select_file()
+data = load_and_prepare_data(file_path)
+
 
 # Export function
 def export_to_excel(data, filename="cleansed_data.xlsx"):
