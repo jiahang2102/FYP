@@ -17,6 +17,7 @@ if uploaded_file is not None:
     try:
         data = fyp.load_and_prepare_data(uploaded_file)
         st.success("File successfully loaded and cleansed.")
+        st.write("Available columns in the data:", data.columns.tolist())
     except Exception as e:
         st.error(f"Error processing the uploaded file: {e}")
         st.stop()
@@ -26,27 +27,27 @@ else:
 
 # Define relevant columns for display
 columns_to_display = [
-    "Brand Name",
-    "Active Pharmeutical Ingredient Strength (mg)",
-    "Dosage Form",
-    "number of tablets",
-    "Total weight of tablets without mixed packaging",
-    "Packaging Complexity Score",
-    "Weight per Unit Box or Strip",
-    "Weight-to-Strength Ratio",
+    "brand_name",  # Updated to match cleansed DataFrame column names
+    "active_pharmaceutical_ingredient_strength_mg",
+    "dosage_form",
+    "number_of_tablets",
+    "total_weight_of_tablets_without_mixed_packaging",
+    "packaging_complexity_score",
+    "weight_per_unit_box_or_strip",
+    "weight_to_strength_ratio",
 ]
+
+# Check if all required columns exist
+missing_columns = [col for col in columns_to_display if col not in data.columns]
+if missing_columns:
+    st.warning(f"The following columns are missing and will not be displayed: {missing_columns}")
+    columns_to_display = [col for col in columns_to_display if col in data.columns]
 
 # Editable data table
 edited_data = st.data_editor(
     data[columns_to_display],
     num_rows="dynamic",
     disabled=[],  # Allow editing of all columns
-    column_config={
-        "Active Pharmeutical Ingredient Strength (mg)": st.column_config.NumberColumn(format="%.2f mg"),
-        "Total weight of tablets without mixed packaging": st.column_config.NumberColumn(format="%.2f g"),
-        "Weight-to-Strength Ratio": st.column_config.NumberColumn(format="%.2f"),
-    },
-    key="inventory_table",
 )
 
 # Add a save button
@@ -57,31 +58,34 @@ if st.button("Save Changes"):
 st.subheader("Inventory Insights")
 
 # 1. Total weight by drug
-st.altair_chart(
-    alt.Chart(data).mark_bar().encode(
-        x="Total weight of tablets without mixed packaging",
-        y=alt.Y("Brand Name", sort="-x"),
-        color="Brand Name",
-    ),
-    use_container_width=True,
-)
+if "total_weight_of_tablets_without_mixed_packaging" in data.columns:
+    st.altair_chart(
+        alt.Chart(data).mark_bar().encode(
+            x="total_weight_of_tablets_without_mixed_packaging",
+            y=alt.Y("brand_name", sort="-x"),
+            color="brand_name",
+        ),
+        use_container_width=True,
+    )
 
 # 2. Tablets per drug
-st.altair_chart(
-    alt.Chart(data).mark_bar(color="orange").encode(
-        x="number of tablets",
-        y=alt.Y("Brand Name", sort="-x"),
-    ),
-    use_container_width=True,
-)
+if "number_of_tablets" in data.columns:
+    st.altair_chart(
+        alt.Chart(data).mark_bar(color="orange").encode(
+            x="number_of_tablets",
+            y=alt.Y("brand_name", sort="-x"),
+        ),
+        use_container_width=True,
+    )
 
 # Alerts for low stock
 st.subheader("Low Stock Alerts")
-low_stock_threshold = st.slider("Set low stock threshold", min_value=0, max_value=100, value=10)
-low_stock_items = data[data["number of tablets"] <= low_stock_threshold]
+if "number_of_tablets" in data.columns:
+    low_stock_threshold = st.slider("Set low stock threshold", min_value=0, max_value=100, value=10)
+    low_stock_items = data[data["number_of_tablets"] <= low_stock_threshold]
 
-if not low_stock_items.empty:
-    st.error("The following items are running low:")
-    st.dataframe(low_stock_items)
-else:
-    st.success("All items are sufficiently stocked.")
+    if not low_stock_items.empty:
+        st.error("The following items are running low:")
+        st.dataframe(low_stock_items)
+    else:
+        st.success("All items are sufficiently stocked.")
