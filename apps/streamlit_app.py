@@ -36,12 +36,6 @@ columns_to_display = [
     "Weight-to-Strength Ratio",
 ]
 
-# Check if all required columns exist
-missing_columns = [col for col in columns_to_display if col not in data.columns]
-if missing_columns:
-    st.error(f"The following columns are missing from the data: {missing_columns}")
-    st.stop()
-
 # Editable data table
 edited_data = st.data_editor(
     data[columns_to_display],
