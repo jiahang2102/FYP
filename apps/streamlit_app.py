@@ -9,29 +9,20 @@ st.set_page_config(
     page_icon=":pill:",
 )
 
-# Streamlit file uploader
-uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx", "xls"])
-
-if uploaded_file is not None:
-    # Use fyp.load_and_prepare_data to process the uploaded file
+# Load the cleansed dataset using the fyp module
+def load_cleansed_data():
     try:
-        data = fyp.load_and_prepare_data(uploaded_file)
+        data = fyp.load_and_prepare_data("SOI_database_cleaned.xlsx")  # Replace with the correct dataset path
+        return data
     except Exception as e:
-        st.error(f"Error processing the uploaded file: {e}")
+        st.error(f"Error loading cleansed data: {e}")
         st.stop()
-else:
-    st.info("Please upload an Excel file to proceed.")
-    st.stop()
 
-# Display the title and introductory information
-"""
-# 🌐 Drug Inventory Tracker
+# Load cleansed data
+data = load_cleansed_data()
 
-**Track your drug inventory with ease!**
-This dashboard displays inventory data directly from the cleansed dataset.
-"""
-
-st.info("Below is the current inventory data. You can edit, add, or remove entries as needed.")
+# Display column names for debugging
+st.write("Columns in DataFrame:", data.columns.tolist())
 
 # Define relevant columns for display
 columns_to_display = [
