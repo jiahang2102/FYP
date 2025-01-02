@@ -146,22 +146,7 @@ def load_and_prepare_data(file_path):
 
 # File selection utility
 def select_file():
-    print("Select the Excel file to load the data.")
-    root = tk.Tk()
-    root.withdraw()  # Hide the main tkinter window
-    file_path = filedialog.askopenfilename(
-        title="Select Excel File",
-        filetypes=[("Excel files", "*.xlsx *.xls"), ("All files", "*.*")]
-    )
-    if not file_path:
-        print("No file selected. Exiting...")
-        exit(1)
-    return file_path
-
-# Get file path dynamically
-file_path = select_file()
-data = load_and_prepare_data(file_path)
-
+    return "SOI_database_cleaned.xlsx"
 
 # Export function
 def export_to_excel(data, filename="cleansed_data.xlsx"):
