@@ -9,20 +9,20 @@ st.set_page_config(
     page_icon=":pill:",
 )
 
-# Load the cleansed dataset using the fyp module
-def load_cleansed_data():
+# Streamlit file uploader
+uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx", "xls"])
+
+if uploaded_file is not None:
+    # Use fyp.load_and_prepare_data to process the uploaded file
     try:
-        data = fyp.load_and_prepare_data("data/cleansed_data.xlsx")  # Replace with the correct dataset path
-        return data
+        data = fyp.load_and_prepare_data(uploaded_file)
+        st.write("Columns in cleansed data:", data.columns.tolist())
     except Exception as e:
-        st.error(f"Error loading cleansed data: {e}")
+        st.error(f"Error processing the uploaded file: {e}")
         st.stop()
-
-# Load cleansed data
-data = load_cleansed_data()
-
-# Display column names for debugging
-st.write("Columns in DataFrame:", data.columns.tolist())
+else:
+    st.info("Please upload an Excel file to proceed.")
+    st.stop()
 
 # Define relevant columns for display
 columns_to_display = [
@@ -57,12 +57,7 @@ edited_data = st.data_editor(
 
 # Add a save button
 if st.button("Save Changes"):
-    # Placeholder for saving functionality
     st.success("Changes saved successfully! (Implement saving logic)")
-
-"""
----
-"""
 
 # Visualizations
 st.subheader("Inventory Insights")
