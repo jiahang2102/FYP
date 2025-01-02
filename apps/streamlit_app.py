@@ -59,7 +59,7 @@ data_display = data[columns_to_display].fillna("N/A")
 
 # Editable data table
 edited_data = st.data_editor(
-    data_display,
+    data[columns_to_display],
     num_rows="dynamic",
     disabled=[],  # Allow editing of all columns
     column_config={
