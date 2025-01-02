@@ -54,9 +54,12 @@ if not columns_to_display:
     st.error("No valid columns found in the dataset. Please check the data file.")
     st.stop()
 
+# Replace null values with a placeholder for better visualization
+data_display = data[columns_to_display].fillna("N/A")
+
 # Editable data table
 edited_data = st.data_editor(
-    data[columns_to_display],
+    data_display,
     num_rows="dynamic",
     disabled=[],  # Allow editing of all columns
     column_config={
