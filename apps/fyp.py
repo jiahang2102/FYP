@@ -11,8 +11,6 @@ from sklearn.metrics import mean_squared_error, r2_score, make_scorer
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
-import tkinter as tk
-from tkinter import filedialog
 
 
 def load_and_prepare_data(file_path):
