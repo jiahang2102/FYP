@@ -9,13 +9,13 @@ st.set_page_config(
 )
 
 # Load the dataset
-DATA_PATH = "FYP/data/cleansed_data.xlsx"  # Ensure the Excel file is in the same directory
+DATA_PATH = "data/cleansed_data.xlsx"  # Update the path as per your repository structure
 def load_data(file_path):
     try:
         df = pd.read_excel(file_path, sheet_name=0)
         return df
     except FileNotFoundError:
-        st.error("Data file not found. Please ensure 'SOI_database_cleaned.xlsx' is in the directory.")
+        st.error(f"Data file not found. Please ensure the file is located at '{file_path}'.")
         return pd.DataFrame()
 
 data = load_data(DATA_PATH)
