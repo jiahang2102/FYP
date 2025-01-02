@@ -9,7 +9,7 @@ st.set_page_config(
 )
 
 # Load the dataset
-DATA_PATH = "data/cleansed_data.xlsx"  # Ensure the Excel file is in the same directory
+DATA_PATH = "FYP/data/cleansed_data.xlsx"  # Ensure the Excel file is in the same directory
 def load_data(file_path):
     try:
         df = pd.read_excel(file_path, sheet_name=0)
