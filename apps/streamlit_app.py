@@ -12,7 +12,7 @@ st.set_page_config(
 # Load the cleansed dataset using the fyp module
 def load_cleansed_data():
     try:
-        data = fyp.load_and_prepare_data("SOI_database_cleaned.xlsx")  # Replace with the correct dataset path
+        data = fyp.load_and_prepare_data("data/cleansed_data.xlsx")  # Replace with the correct dataset path
         return data
     except Exception as e:
         st.error(f"Error loading cleansed data: {e}")
