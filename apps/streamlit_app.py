@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+import fyp  # Import the custom data cleansing and model code
 
 # Set the page configuration
 st.set_page_config(
@@ -8,19 +9,16 @@ st.set_page_config(
     page_icon=":pill:",
 )
 
-# Load the dataset
-DATA_URL = "https://raw.githubusercontent.com/jiahang2102/FYP/main/data/SOI%20database_cleaned.xlsx"  # GitHub raw URL
-
-def load_data(file_path):
+# Load the cleansed dataset using the fyp module
+def load_cleansed_data():
     try:
-        df = pd.read_excel(file_path, sheet_name=0)
-        return df
+        data = fyp.load_and_prepare_data("SOI_database_cleaned.xlsx")  # Call the cleansing function from fyp
+        return data
     except Exception as e:
-        st.error(f"Error loading data: {e}")
+        st.error(f"Error loading cleansed data: {e}")
         return pd.DataFrame()
 
-# Load data from GitHub raw URL
-data = load_data(DATA_URL)
+data = load_cleansed_data()
 
 # Check if data loaded successfully
 if data.empty:
@@ -39,14 +37,13 @@ st.info("Below is the current inventory data. You can edit, add, or remove entri
 # Define relevant columns for display
 columns_to_display = [
     "Brand Name",
-    "Drug Code",
-    "Active Pharmaceutical Ingredients",
     "Active Pharmeutical Ingredient Strength (mg)",
     "Dosage Form",
-    "Combination Drug (Y/N)",
-    "Special Formulation (Y/N)",
     "number of tablets",
-    "Total weight of counted drug with mixed packing",
+    "Total weight of tablets without mixed packaging",
+    "Packaging Complexity Score",
+    "Weight per Unit Box or Strip",
+    "Weight-to-Strength Ratio",
 ]
 
 # Editable data table
