@@ -17,7 +17,6 @@ if uploaded_file is not None:
     try:
         data = fyp.load_and_prepare_data(uploaded_file)
         st.success("File successfully loaded and cleansed.")
-        st.write("Available columns in the data:", data.columns.tolist())
     except Exception as e:
         st.error(f"Error processing the uploaded file: {e}")
         st.stop()
@@ -36,12 +35,6 @@ columns_to_display = [
     "weight_per_unit_box_or_strip",
     "weight_to_strength_ratio",
 ]
-
-# Check if all required columns exist
-missing_columns = [col for col in columns_to_display if col not in data.columns]
-if missing_columns:
-    st.warning(f"The following columns are missing and will not be displayed: {missing_columns}")
-    columns_to_display = [col for col in columns_to_display if col in data.columns]
 
 # Editable data table
 edited_data = st.data_editor(
