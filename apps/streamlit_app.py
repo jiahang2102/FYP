@@ -16,7 +16,7 @@ if uploaded_file is not None:
     # Use fyp.load_and_prepare_data to process the uploaded file
     try:
         data = fyp.load_and_prepare_data(uploaded_file)
-        st.write("Columns in cleansed data:", data.columns.tolist())
+        st.success("File successfully loaded and cleansed.")
     except Exception as e:
         st.error(f"Error processing the uploaded file: {e}")
         st.stop()
