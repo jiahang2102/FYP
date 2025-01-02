@@ -13,6 +13,7 @@ DATA_PATH = "data/cleansed_data.xlsx"  # Updated to point to the correct file
 def load_data(file_path):
     try:
         df = pd.read_excel(file_path, sheet_name=0)
+        df.columns = df.columns.str.strip()  # Clean column names (remove leading/trailing spaces)
         return df
     except FileNotFoundError:
         st.error(f"Data file not found. Please ensure the file is located at '{file_path}'.")
@@ -32,6 +33,7 @@ This dashboard displays inventory data directly from the uploaded datasheet.
 """
 
 st.info("Below is the current inventory data. You can edit, add, or remove entries as needed.")
+
 # Define relevant columns for display
 columns_to_display = [
     "Brand Name",
@@ -44,6 +46,14 @@ columns_to_display = [
     "number of tablets",
     "Total weight of counted drug with mixed packing",
 ]
+
+# Keep only existing columns in the dataset
+columns_to_display = [col for col in columns_to_display if col in data.columns]
+
+if not columns_to_display:
+    st.error("No valid columns found in the dataset. Please check the data file.")
+    st.stop()
+
 # Editable data table
 edited_data = st.data_editor(
     data[columns_to_display],
@@ -86,10 +96,11 @@ st.altair_chart(
     ),
     use_container_width=True,
 )
+
 # Alerts for low stock
 st.subheader("Low Stock Alerts")
 low_stock_threshold = st.slider("Set low stock threshold", min_value=0, max_value=100, value=10)
-low_stock_items = data[data["number of tablets"] <= low_stock_threshold]
+low_stock_items = data[data["number of tablets"] <= low_stock_threshold] if "number of tablets" in data.columns else pd.DataFrame()
 if not low_stock_items.empty:
     st.error("The following items are running low:")
     st.dataframe(low_stock_items)
