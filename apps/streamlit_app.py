@@ -48,7 +48,7 @@ columns_to_display = [
 ]
 
 # Keep only existing columns in the dataset
-columns_to_display = [col for col in columns_to_display if col in data.columns]
+columns_to_display = [col for col in columns_to_display]
 
 if not columns_to_display:
     st.error("No valid columns found in the dataset. Please check the data file.")
