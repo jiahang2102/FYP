@@ -9,19 +9,18 @@ st.set_page_config(
     page_icon=":pill:",
 )
 
-# Load the cleansed dataset using the fyp module
-def load_cleansed_data():
+# Streamlit file uploader
+uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx", "xls"])
+
+if uploaded_file is not None:
+    # Use fyp.load_and_prepare_data to process the uploaded file
     try:
-        data = fyp.load_and_prepare_data("SOI_database_cleaned.xlsx")  # Call the cleansing function from fyp
-        return data
+        data = fyp.load_and_prepare_data(uploaded_file)
     except Exception as e:
-        st.error(f"Error loading cleansed data: {e}")
-        return pd.DataFrame()
-
-data = load_cleansed_data()
-
-# Check if data loaded successfully
-if data.empty:
+        st.error(f"Error processing the uploaded file: {e}")
+        st.stop()
+else:
+    st.info("Please upload an Excel file to proceed.")
     st.stop()
 
 # Display the title and introductory information
