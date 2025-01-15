@@ -46,21 +46,6 @@ def load_and_prepare_data(file_path):
     )
     return df
 
-#Drop rows with missing values
-def drop_missing_values(data):
-    """
-    Drops rows with missing values from the dataset.
-
-    Parameters:
-    - data: pd.DataFrame - The input dataset.
-
-    Returns:
-    - pd.DataFrame - The dataset with rows containing missing values removed.
-    """
-    # Drop rows with any missing values
-    data_cleaned = data.dropna()
-    return data_cleaned
-    
 # Train models
 def train_model(data, model_type):
     try:
