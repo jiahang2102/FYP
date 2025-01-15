@@ -48,29 +48,58 @@ def load_and_prepare_data(file_path):
 
 # Train models
 def train_model(data, model_type):
-    X = data.drop(columns=['number of tablets'], errors='ignore')
-    y = data['number of tablets']
-    X = pd.get_dummies(X, drop_first=True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    try:
+        # Ensure target variable is present
+        if 'number of tablets' not in data.columns:
+            st.error("The target column 'number of tablets' is missing from the dataset.")
+            return None, None, None
 
-    if model_type == 'Linear Regression':
-        model = LinearRegression()
-    elif model_type == 'Gradient Boosting':
-        model = GradientBoostingRegressor(n_estimators=300, learning_rate=0.09, max_depth=3, random_state=42)
-    elif model_type == 'XGBoost':
-        model = XGBRegressor(n_estimators=400, learning_rate=0.06, max_depth=4, random_state=42)
-    elif model_type == 'Random Forest':
-        model = RandomForestRegressor(n_estimators=200, random_state=42)
-    else:
-        st.error("Invalid model type selected.")
+        # Separate features and target
+        X = data.drop(columns=['number of tablets'], errors='ignore')
+        y = data['number of tablets']
+
+        # Convert categorical variables to dummies
+        X = pd.get_dummies(X, drop_first=True)
+
+        # Check for NaN or infinite values
+        if X.isnull().sum().sum() > 0 or y.isnull().sum() > 0:
+            st.error("Dataset contains missing values. Please clean the data and try again.")
+            st.write("Missing values in features:", X.isnull().sum().sum())
+            st.write("Missing values in target:", y.isnull().sum())
+            return None, None, None
+
+        if not np.isfinite(X).all().all() or not np.isfinite(y).all():
+            st.error("Dataset contains non-finite values (e.g., Inf or -Inf). Please clean the data.")
+            return None, None, None
+
+        # Split the data into training and test sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+        # Select and train the model
+        if model_type == 'Linear Regression':
+            model = LinearRegression()
+        elif model_type == 'Gradient Boosting':
+            model = GradientBoostingRegressor(n_estimators=300, learning_rate=0.09, max_depth=3, random_state=42)
+        elif model_type == 'XGBoost':
+            model = XGBRegressor(n_estimators=400, learning_rate=0.06, max_depth=4, random_state=42)
+        elif model_type == 'Random Forest':
+            model = RandomForestRegressor(n_estimators=200, random_state=42)
+        else:
+            st.error("Invalid model type selected.")
+            return None, None, None
+
+        # Train the model
+        model.fit(X_train, y_train)
+
+        # Make predictions and calculate metrics
+        y_pred = model.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+
+        return model, mse, r2
+    except Exception as e:
+        st.error(f"An error occurred during model training: {e}")
         return None, None, None
-
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    return model, mse, r2
-
 # File upload
 st.title("Drug Inventory Tracker")
 uploaded_file = st.file_uploader("Upload your dataset (Excel format)", type=["xlsx"])
