@@ -24,7 +24,7 @@ def load_and_prepare_data(file_path):
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
     
-    # Drop unnecessary columns and preprocess
+    # Drop unnecessary columns
     columns_to_drop = [
         'no. of tablets/unit per box', 'average weight of one box of medication with PIL (g)',
         'Drug Code', 'Active Pharmaceutical Ingredients', 'Combination Drug (Y/N)',
@@ -32,20 +32,119 @@ def load_and_prepare_data(file_path):
         'ZipLock bag (XL)', 'Drug Bin Weight (g)', 'Rubber band'
     ]
     df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
+    
+    # Remove unnamed columns
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    
+    # Remove duplicate rows
+    df.drop_duplicates(inplace=True)
+    
+    # Replace "N.A." values with NaN
     df.replace(to_replace=r'(?i)\bN\.?A\.?\b', value=np.nan, regex=True, inplace=True)
+    
+    # Drop rows with NaN in essential columns
     df.dropna(subset=['number of tablets', 'Average weight of one loose cut tablet', 
                       'Active Pharmeutical Ingredient Strength (mg)'], inplace=True)
-
-    # Feature engineering
+    
+    # Calculate total weight of tablets without mixed packaging
     df['Total weight of tablets without mixed packaging'] = (
         df['number of tablets'] * df['Average weight of one loose cut tablet']
     )
-    df['Weight-to-Strength Ratio'] = (
-        df['Total weight of tablets without mixed packaging'] / 
-        df['Active Pharmeutical Ingredient Strength (mg)']
+    
+    # Remove outliers using the IQR method
+    def remove_outliers(df, column):
+        Q1 = df[column].quantile(0.25)
+        Q3 = df[column].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        return df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+    
+    columns_to_check_outliers = [
+        'number of tablets',
+        'Average weight of one loose cut tablet',
+        'Active Pharmeutical Ingredient Strength (mg)'
+    ]
+    for col in columns_to_check_outliers:
+        df = remove_outliers(df, col)
+    
+    # Calculate Packaging Complexity Score
+    def calculate_complexity_score(row):
+        score = 1  # Base score if the drug has only one packaging type
+        if row.get('Box (Y/N)', 'N') == 'Y':
+            score += 1
+        if row.get('Full strips (Y/N)', 'N') == 'Y':
+            score += 1
+        if row.get('Loose Cut (Y/N)', 'N') == 'Y':
+            score -= 1
+        if row.get('rubber band (Y/N)', 'N') == 'Y':
+            score += 1
+        return score
+    df['Packaging Complexity Score'] = df.apply(calculate_complexity_score, axis=1)
+    
+    # Calculate Number of Packaging
+    df['Number of Packaging'] = (
+        (df['Full strips (Y/N)'] == 'Y').astype(int) +
+        (df['Box (Y/N)'] == 'Y').astype(int) +
+        df['Number of rubber band']
     )
+    
+    # Calculate weight per unit box or strip
+    df['Weight per Unit Box or Strip'] = (
+        df['Average weight of one strip/unit of medication (g)'] / df['no. of tablet/unit per strip']
+    )
+    
+    # Mean Weight by Packaging Type
+    df['Mean Weight Box'] = df.apply(
+        lambda row: row['Total weight of tablets without mixed packaging'] / row['number of tablets']
+                    if row.get('Box (Y/N)', 'N') == 'Y' else 0, 
+        axis=1
+    )
+    df['Mean Weight Strip'] = df.apply(
+        lambda row: row['Total weight of tablets without mixed packaging'] / row['number of tablets']
+                    if row.get('Full strips (Y/N)', 'N') == 'Y' else 0, 
+        axis=1
+    )
+    df['Mean Weight Loose Cut'] = df.apply(
+        lambda row: row['Total weight of tablets without mixed packaging'] / row['number of tablets']
+                    if row.get('Loose Cut (Y/N)', 'N') == 'Y' else 0, 
+        axis=1
+    )
+    
+    # Calculate Weight-to-Strength Ratio
+    df['Weight-to-Strength Ratio'] = df.apply(
+        lambda row: row['Total weight of tablets without mixed packaging'] / row['Active Pharmeutical Ingredient Strength (mg)']
+        if row['Active Pharmeutical Ingredient Strength (mg)'] > 0 else np.nan,
+        axis=1
+    )
+    
+    # Polynomial interactions: squared terms and interaction terms
+    df['Total Weight Squared'] = df['Total weight of tablets without mixed packaging'] ** 2
+    df['Tablet Count Squared'] = df['number of tablets'] ** 2
+    df['Weight x Tablet Count'] = df['Total weight of tablets without mixed packaging'] * df['number of tablets']
+    
+    # Z-Score Normalization for key numerical columns
+    columns_to_normalize = [
+        'Total weight of tablets without mixed packaging',
+        'Weight per Unit Box or Strip',
+        'number of tablets',
+        'Active Pharmeutical Ingredient Strength (mg)',
+        'Packaging Complexity Score'
+    ]
+    for col in columns_to_normalize:
+        col_mean = df[col].mean()
+        col_std = df[col].std()
+        df[f'Normalized {col}'] = (df[col] - col_mean) / col_std
+    
+    # One-hot encoding for categorical columns
+    columns_to_encode = [col for col in df.select_dtypes(include=['object']).columns if col != 'Brand Name']
+    df = pd.get_dummies(df, columns=columns_to_encode, drop_first=True)
+    
+    # Final cleanup: drop any remaining NaN rows introduced during encoding or transformations
+    df.dropna(inplace=True)
+    
     return df
-
+    
 # Train models
 def train_model(data, model_type):
     try:
