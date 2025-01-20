@@ -259,6 +259,66 @@ if st.button("Save Changes"):
 ---
 """
 
+# Section: Add New Data
+st.subheader("Add New Data")
+
+# Create a form for user input
+with st.form("add_data_form", clear_on_submit=True):
+    st.write("Enter new data below:")
+
+    # User inputs for each column (replace column names and types as needed)
+    brand_name = st.text_input("Brand Name")
+    number_of_tablets = st.number_input("Number of Tablets", min_value=0, step=1)
+    avg_weight_tablet = st.number_input("Average Weight of One Loose Cut Tablet (g)", min_value=0.0, step=0.01)
+    strength_mg = st.number_input("Active Pharmaceutical Ingredient Strength (mg)", min_value=0.0, step=0.1)
+    packaging_box = st.selectbox("Box (Y/N)", options=["Y", "N"])
+    packaging_strip = st.selectbox("Full Strips (Y/N)", options=["Y", "N"])
+    packaging_loose = st.selectbox("Loose Cut (Y/N)", options=["Y", "N"])
+    rubber_band = st.number_input("Number of Rubber Bands", min_value=0, step=1)
+
+    # Submit button for the form
+    submitted = st.form_submit_button("Add Data")
+
+    if submitted:
+        # Validate the input
+        errors = []
+        if not brand_name.strip():
+            errors.append("Brand Name cannot be empty.")
+        if number_of_tablets <= 0:
+            errors.append("Number of Tablets must be greater than zero.")
+        if avg_weight_tablet <= 0:
+            errors.append("Average Weight must be a positive number.")
+        if strength_mg <= 0:
+            errors.append("Active Pharmaceutical Ingredient Strength must be a positive number.")
+        if rubber_band < 0:
+            errors.append("Number of Rubber Bands cannot be negative.")
+
+        # If validation errors exist, show them to the user
+        if errors:
+            for error in errors:
+                st.error(error)
+        else:
+            # Add the valid data to the DataFrame
+            new_row = {
+                "Brand Name": brand_name,
+                "number of tablets": number_of_tablets,
+                "Average weight of one loose cut tablet": avg_weight_tablet,
+                "Active Pharmeutical Ingredient Strength (mg)": strength_mg,
+                "Box (Y/N)": packaging_box,
+                "Full strips (Y/N)": packaging_strip,
+                "Loose Cut (Y/N)": packaging_loose,
+                "Number of rubber band": rubber_band,
+            }
+
+            # Append the new row to the dataset
+            if 'data' in locals() and not data.empty:
+                data = data.append(new_row, ignore_index=True)
+                st.success("Data added successfully!")
+                st.dataframe(data.tail(5))  # Show the last few rows as confirmation
+            else:
+                st.error("No dataset is loaded. Please upload a dataset first.")
+
+
 # Visualizations
 st.subheader("Inventory Insights")
 
