@@ -311,12 +311,9 @@ with st.form("add_data_form", clear_on_submit=True):
             }
 
             # Append the new row to the dataset
-            if 'data' in locals() and not data.empty:
-                data = pd.concat([data, new_row_df], ignore_index=True)
-                st.success("Data added successfully!")
-                st.dataframe(data.tail(5))  # Show the last few rows as confirmation
-            else:
-                st.error("No dataset is loaded. Please upload a dataset first.")
+            st.session_state.data = pd.concat([st.session_state.data, new_row], ignore_index=True)
+            st.success("Data added successfully!")
+            st.dataframe(st.session_state.data.tail(5))  # Show the last few rows as confirmation
 
 
 # Visualizations
