@@ -312,7 +312,7 @@ with st.form("add_data_form", clear_on_submit=True):
 
             # Append the new row to the dataset
             if 'data' in locals() and not data.empty:
-                data = data.append(new_row, ignore_index=True)
+                data = pd.concat([data, new_row_df], ignore_index=True)
                 st.success("Data added successfully!")
                 st.dataframe(data.tail(5))  # Show the last few rows as confirmation
             else:
